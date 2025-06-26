@@ -6,5 +6,7 @@ public class GameplayInstaller : MonoInstaller
     {
         Container.Bind<SceneTransistion>().FromComponentInHierarchy().AsSingle();
         Container.Bind<InputManager>().FromComponentInHierarchy().AsSingle();
+
+        Container.Bind<GameState>().FromComponentInHierarchy().AsTransient();
     }
 }

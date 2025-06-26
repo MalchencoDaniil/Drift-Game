@@ -6,15 +6,19 @@ using Zenject;
 public class CarMovement : MonoBehaviour
 {
     private InputManager _inputManager;
+    private bool _onStart = false;
 
     private Vector2 _movementDirection;
 
     private new Rigidbody _rb;
     private float _currentSpeed;
 
-    private bool _isStop = false;
+    private bool _isStop = true;
 
     [Header("Speed Stats")]
+    [SerializeField]
+    private InputType _inputType;
+
     [SerializeField]
     private float _maxSpeed = 45;
 
@@ -31,13 +35,14 @@ public class CarMovement : MonoBehaviour
     [SerializeField]
     private float _driftAcceleration = 11;
 
-    [Header("Visual")]
+    [Header("Visual References")]
     [SerializeField]
     private Transform _visual;
 
     [SerializeField]
     private List<Transform> _rotationWheels;
 
+    [Header("Visual Stats")]
     [SerializeField]
     private float _visualRotationMaxDegree;
 
@@ -46,6 +51,13 @@ public class CarMovement : MonoBehaviour
 
     [SerializeField]
     private float _visualResetRotationSpeed;
+
+    [Header("Screen Zones")]
+    [SerializeField]
+    private float leftZoneThreshold = 0.3f;
+
+    [SerializeField]
+    private float rightZoneThreshold = 0.7f;
 
     [Inject]
     public void Construct(InputManager inputManager)
@@ -63,6 +75,17 @@ public class CarMovement : MonoBehaviour
         return _inputManager._inputActions.Player.Movement.ReadValue<Vector2>();
     }
 
+    private void Update()
+    {
+        if ((Input.anyKeyDown || Input.touchCount > 0) && !_onStart)
+        {
+            _onStart = true;
+            _isStop = false;
+        }
+    }
+
+    float _horizontalInput;
+
     private void FixedUpdate()
     {
         if (_isStop)
@@ -75,16 +98,37 @@ public class CarMovement : MonoBehaviour
 
         _movementDirection = MovementInput();
 
-        Move();
+        if (_inputType == InputType.PC)
+            Move(_movementDirection.x);
+        else
+        {
+            _horizontalInput = 0f;
+
+            if (Input.touchCount > 0)
+            {
+                Touch _touch = Input.GetTouch(0);
+
+                float _touchPositionX = _touch.position.x / Screen.width;
+
+                if (_touchPositionX < leftZoneThreshold)
+                {
+                    _horizontalInput = -1f;
+                }
+                else if (_touchPositionX > rightZoneThreshold)
+                {
+                    _horizontalInput = 1f;
+                }
+            }
+        }
     }
 
-    private void Move()
+    private void Move(float horizontalAxis)
     {
-        if (_movementDirection.x != 0)
+        if (horizontalAxis != 0)
         {
-            if (_movementDirection.x < 0)
+            if (horizontalAxis < 0)
                 TurnLeft();
-            else if (_movementDirection.x > 0)
+            else if (horizontalAxis > 0)
                 TurnRight();
 
             _currentSpeed += _driftAcceleration * Time.deltaTime;

@@ -1,18 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Zenject;
 
 public class CarCollision : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [Inject]
+    private GameState _gameState;
 
-    // Update is called once per frame
-    void Update()
+    private void OnCollisionEnter(Collision _collision)
     {
-        
+        if (_collision.gameObject.tag == TagDictionary.obstacle)
+        {
+            _gameState.Loss();
+        }
     }
 }
