@@ -8,16 +8,18 @@ public class CarMovement : MonoBehaviour
     private InputManager _inputManager;
     private bool _onStart = false;
 
+    private float _horizontalInput;
+
     private Vector2 _movementDirection;
 
-    private new Rigidbody _rb;
+    private Rigidbody _rb;
     private float _currentSpeed;
 
     private bool _isStop = true;
 
     [Header("Speed Stats")]
     [SerializeField]
-    private InputType _inputType;
+    private InputHandler _inputHandler;
 
     [SerializeField]
     private float _maxSpeed = 45;
@@ -77,14 +79,13 @@ public class CarMovement : MonoBehaviour
 
     private void Update()
     {
-        if ((Input.anyKeyDown || Input.touchCount > 0) && !_onStart)
+        if (Input.anyKeyDown && !_onStart)
         {
             _onStart = true;
             _isStop = false;
         }
     }
 
-    float _horizontalInput;
 
     private void FixedUpdate()
     {
@@ -98,9 +99,10 @@ public class CarMovement : MonoBehaviour
 
         _movementDirection = MovementInput();
 
-        if (_inputType == InputType.PC)
+        if (_inputHandler._inputType == InputType.PC)
             Move(_movementDirection.x);
-        else
+
+        if (_inputHandler._inputType == InputType.Android)
         {
             _horizontalInput = 0f;
 
@@ -119,6 +121,8 @@ public class CarMovement : MonoBehaviour
                     _horizontalInput = 1f;
                 }
             }
+
+            Move(_horizontalInput);
         }
     }
 
